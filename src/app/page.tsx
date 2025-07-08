@@ -6,6 +6,7 @@ import { AdvocateType } from "./types/types";
 export default function Home() {
   const [advocates, setAdvocates] = useState<AdvocateType[]>([]);
   const [filteredAdvocates, setFilteredAdvocates] = useState<AdvocateType[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string|undefined>("");
 
   useEffect(() => {
     console.log("fetching advocates...");
@@ -20,29 +21,29 @@ export default function Home() {
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value;
 
-    const searchElement = document.getElementById("search-term");
-    if (searchElement) {
-      searchElement.innerHTML = searchTerm;
-    }
-
     console.log("filtering advocates...");
     const filteredAdvocates = advocates.filter((advocate) => {
       return (
-        advocate.firstName.includes(searchTerm) ||
-        advocate.lastName.includes(searchTerm) ||
-        advocate.city.includes(searchTerm) ||
-        advocate.degree.includes(searchTerm) ||
-        advocate.specialties.includes(searchTerm) ||
-        advocate.yearsOfExperience.toString().includes(searchTerm)
+        advocate.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        advocate.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        advocate.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        advocate.degree.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        advocate.specialties.some((s) =>
+          s.toLowerCase().includes(searchTerm.toLowerCase())
+        ) ||
+        advocate.yearsOfExperience.toString().includes(searchTerm) ||
+        advocate.phoneNumber.toString().includes(searchTerm)
       );
     });
 
+    setSearchTerm(searchTerm);
     setFilteredAdvocates(filteredAdvocates);
   };
 
   const onClick = () => {
     console.log(advocates);
     setFilteredAdvocates(advocates);
+    setSearchTerm("");
   };
 
   const styles = {
@@ -57,13 +58,14 @@ export default function Home() {
         <div>
           <p>Search</p>
           <p>
-            Searching for: <span id="search-term"></span>
+            Searching for: <span id="search-term">{searchTerm}</span>
           </p>
           <input 
             type="text"
             id="search-term"
             className="w-full px-4 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-accent bg-background"
             placeholder="Search by name or specialty..."
+            value={searchTerm}
             onChange={onChange} 
           />
           <button 
